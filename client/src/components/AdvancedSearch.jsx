@@ -19,13 +19,13 @@ let abortController = new window.AbortController();
 
 const initCoopSearchSettings = () => {
 	return {
-  name: '',
-  type: '',
-  street: '',
-  city: '',
-  state: '',
-  zip: '',
-  enabled: true,
+	  name: '',
+	  type: '',
+	  street: '',
+	  city: '',
+	  state: '',
+	  zip: '',
+	  enabled: true
   };
 };
 
@@ -84,12 +84,18 @@ const AdvancedSearch = (props) => {
 	const [coopSearchSettingsToQuery, setCoopSearchSettingsToQuery] = useState(initCoopSearchSettings() || {});
 
 	const [searchResults, setSearchResults] = useState([]);
+
 	const [loading, setLoading] = useState(false);
+
+	// search results show when isSubmitted = true
+	// isSubmitted = false when page first loads so that search results will not show
+	// isSubmitted = true after first time the 'submit' button is hit
+	const [isSubmitted, setIsSubmitted] = useState(false);
 
 	useEffect(() => {
 
 		// set searchResults to empty if coopSearchSettingsToQuery is empty
-		if (_.isEqual(coopSearchSettingsToQuery, initCoopSearchSettings()) ) {
+		if (isSubmitted===false) {
 	      setSearchResults([]);
 	      return;
 	    }
@@ -110,7 +116,9 @@ const AdvancedSearch = (props) => {
 		const { target } = event;
 		const { name, value } = target;
 		event.persist();
-		setCoopSearchSettingsStaging({ ...coopSearchSettingsStaging, [name]: value });
+		setCoopSearchSettingsStaging({ ...coopSearchSettingsStaging,
+			[name]: value
+		});
   };
 
   const handleFormSubmit = (e) => {
@@ -118,6 +126,7 @@ const AdvancedSearch = (props) => {
 		// move search settings from staging to coopSearchSettingsToQuery
 		e.preventDefault();
 		setCoopSearchSettingsToQuery(coopSearchSettingsStaging);
+		setIsSubmitted(true);
   };
 
 	// same logic from Search.jsx
