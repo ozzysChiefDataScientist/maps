@@ -115,13 +115,7 @@ const AdvancedSearch = (props) => {
 		const { target } = event;
 		const { name, value } = target;
 		event.persist();
-<<<<<<< HEAD
-		setCoopSearchSettingsStaging({ ...coopSearchSettingsStaging,
-			[name]: value
-		});
-=======
 		setCoopSearchSettingsStaging({ ...coopSearchSettingsStaging, [name]: value });
->>>>>>> 55fda283abd282abba8fd8c2240ebfc5ced8cd25
   };
 
   const handleFormSubmit = (e) => {
@@ -129,10 +123,7 @@ const AdvancedSearch = (props) => {
 		// move search settings from staging to coopSearchSettingsToQuery
 		e.preventDefault();
 		setCoopSearchSettingsToQuery(coopSearchSettingsStaging);
-<<<<<<< HEAD
 		setIsSubmitted(true);
-=======
->>>>>>> 55fda283abd282abba8fd8c2240ebfc5ced8cd25
   };
 
 	// same logic from Search.jsx
