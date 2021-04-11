@@ -19,6 +19,7 @@ let abortController = new window.AbortController();
 
 const initCoopSearchSettings = () => {
 	return {
+<<<<<<< HEAD
 	  name: '',
 	  type: '',
 	  street: '',
@@ -26,6 +27,15 @@ const initCoopSearchSettings = () => {
 	  state: '',
 	  zip: '',
 	  enabled: true
+=======
+  name: '',
+  type: '',
+  street: '',
+  city: '',
+  state: '',
+  zip: '',
+  enabled: true,
+>>>>>>> 55fda283abd282abba8fd8c2240ebfc5ced8cd25
   };
 };
 
@@ -84,6 +94,7 @@ const AdvancedSearch = (props) => {
 	const [coopSearchSettingsToQuery, setCoopSearchSettingsToQuery] = useState(initCoopSearchSettings() || {});
 
 	const [searchResults, setSearchResults] = useState([]);
+<<<<<<< HEAD
 
 	const [loading, setLoading] = useState(false);
 
@@ -96,6 +107,14 @@ const AdvancedSearch = (props) => {
 
 		// set searchResults to empty if coopSearchSettingsToQuery is empty
 		if (isSubmitted===false) {
+=======
+	const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+
+		// set searchResults to empty if coopSearchSettingsToQuery is empty
+		if (_.isEqual(coopSearchSettingsToQuery, initCoopSearchSettings()) ) {
+>>>>>>> 55fda283abd282abba8fd8c2240ebfc5ced8cd25
 	      setSearchResults([]);
 	      return;
 	    }
@@ -116,9 +135,13 @@ const AdvancedSearch = (props) => {
 		const { target } = event;
 		const { name, value } = target;
 		event.persist();
+<<<<<<< HEAD
 		setCoopSearchSettingsStaging({ ...coopSearchSettingsStaging,
 			[name]: value
 		});
+=======
+		setCoopSearchSettingsStaging({ ...coopSearchSettingsStaging, [name]: value });
+>>>>>>> 55fda283abd282abba8fd8c2240ebfc5ced8cd25
   };
 
   const handleFormSubmit = (e) => {
@@ -126,7 +149,10 @@ const AdvancedSearch = (props) => {
 		// move search settings from staging to coopSearchSettingsToQuery
 		e.preventDefault();
 		setCoopSearchSettingsToQuery(coopSearchSettingsStaging);
+<<<<<<< HEAD
 		setIsSubmitted(true);
+=======
+>>>>>>> 55fda283abd282abba8fd8c2240ebfc5ced8cd25
   };
 
 	// same logic from Search.jsx

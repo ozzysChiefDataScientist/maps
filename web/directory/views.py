@@ -1,6 +1,7 @@
 from directory.models import Coop, CoopType
 from address.models import State, Country, Locality
 from directory.serializers import * 
+from directory.services.google_sheet_service import GoogleSheetService
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -46,6 +47,53 @@ def coops_wo_coordinates(request):
     serializer = CoopSearchSerializer(coops, many=True)
     return Response(serializer.data)
 
+@api_view(('POST',))
+def save_to_sheet_from_form(request):
+    """
+    This is supposed to write to a Google sheet given a form coming from
+    the client.
+    """
+    valid_ser = ValidateNewCoopSerializer(data=request.data)
+    if valid_ser.is_valid():
+        post_data = valid_ser.validated_data
+        values = [
+            'ID',
+            post_data['coop_name'],
+            post_data['street'],
+            post_data['address_public'],
+            post_data['zip'],
+            post_data['city'],
+            post_data['county'],
+            post_data['state'],
+            post_data['country'],
+            post_data['websites'],
+            post_data['contact_name'], # cnct
+            post_data['contact_name_public'], #cnct-pub
+            post_data['organization_email'],
+            post_data['organization_email_public'], # email pub
+            post_data['organization_phone'],
+            post_data['organization_phone_public'],
+            post_data['scope'],
+            post_data['tags'],
+            post_data['desc_english'],
+            post_data['desc_other'],
+            post_data['req_reason'],
+        ]
+        svc = GoogleSheetService()
+        svc.append_to_sheet('ChiCommons_Directory', 4, values)
+        return Response(post_data, status=status.HTTP_201_CREATED)
+    else:
+        return Response(valid_ser.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+    print("request data ...")
+    print(request.data)
+    
+
+    coops = Coop.objects.find_wo_coords()
+    serializer = CoopSearchSerializer(coops, many=True)
+    return Response(serializer.data)
+
 class CoopList(APIView):
     """
     List all coops, or create a new coop.
@@ -71,7 +119,28 @@ class CoopList(APIView):
     def post(self, request, format=None):
         serializer = CoopSerializer(data=request.data)
         if serializer.is_valid():
-            print(" \n\n\n**** saving *****\n\n\n")
+            print("request data ...")
+            print(request.data)
+            values = [
+                'ID',
+                request.data['name'],
+                request.data['addresses'][0]['raw'],
+                '',
+                request.data['addresses'][0]['locality']['postal_code'],
+                request.data['addresses'][0]['locality']['name'],
+                request.data['addresses'][0]['locality']['state']['country']['name'],
+                request.data['web_site'],
+                '', # cnct
+                '', #cnct-pub
+                request.data['email']['email'],
+                '', # email pub
+                request.data['phone']['phone'],
+                '', # phone pub
+                request.data['types'][0]['name']
+            ]
+            svc = GoogleSheetService()
+            svc.append_to_sheet('ChiCommons_Directory', 4, values)
+            #
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
