@@ -19,15 +19,6 @@ let abortController = new window.AbortController();
 
 const initCoopSearchSettings = () => {
 	return {
-<<<<<<< HEAD
-	  name: '',
-	  type: '',
-	  street: '',
-	  city: '',
-	  state: '',
-	  zip: '',
-	  enabled: true
-=======
   name: '',
   type: '',
   street: '',
@@ -35,7 +26,6 @@ const initCoopSearchSettings = () => {
   state: '',
   zip: '',
   enabled: true,
->>>>>>> 55fda283abd282abba8fd8c2240ebfc5ced8cd25
   };
 };
 
@@ -94,8 +84,6 @@ const AdvancedSearch = (props) => {
 	const [coopSearchSettingsToQuery, setCoopSearchSettingsToQuery] = useState(initCoopSearchSettings() || {});
 
 	const [searchResults, setSearchResults] = useState([]);
-<<<<<<< HEAD
-
 	const [loading, setLoading] = useState(false);
 
 	// search results show when isSubmitted = true
@@ -107,14 +95,6 @@ const AdvancedSearch = (props) => {
 
 		// set searchResults to empty if coopSearchSettingsToQuery is empty
 		if (isSubmitted===false) {
-=======
-	const [loading, setLoading] = useState(false);
-
-	useEffect(() => {
-
-		// set searchResults to empty if coopSearchSettingsToQuery is empty
-		if (_.isEqual(coopSearchSettingsToQuery, initCoopSearchSettings()) ) {
->>>>>>> 55fda283abd282abba8fd8c2240ebfc5ced8cd25
 	      setSearchResults([]);
 	      return;
 	    }
