@@ -17,39 +17,24 @@ const { REACT_APP_PROXY } = process.env;
 
 let abortController = new window.AbortController();
 
-const initCoopSearchSettings = () => {
-	return {
-  name: '',
-  type: '',
-  street: '',
-  city: '',
-  state: '',
-  zip: '',
-  enabled: true,
-  };
-};
+/**
+ * Build a search URL in the format
+ * /coops/?name=coopName&type=credit+union&enabled=true&street=Main&city=Chicago&zip=60605&state=IL
+ */
+const buildSearchUrl = (coopSearchSettings, setSearchUrl) => {
 
-const doSearch = (coopSearchSettings, setSearchResults, setLoading) => {
-	// logic is very similar to doSearch in Search components
-	// except searchUrl is built with multiple parameters from completed form
-  abortController.abort();
-  abortController = new window.AbortController();
-  setLoading(true);
-
-	// build search url
 	let searchUrl = REACT_APP_PROXY + '/coops/';
 
 	// compile individual search settings into a list
 	let individualSearchSettings = []
-	if (coopSearchSettings.name != '') {
-		individualSearchSettings.push("name=" + encodeURIComponent(coopSearchSettings.name));
+	if ("name" in coopSearchSettings && coopSearchSettings.name != '') {
+			individualSearchSettings.push("name=" + encodeURIComponent(coopSearchSettings.name));
 	}
-	if (coopSearchSettings.enabled != 'none') {
-		individualSearchSettings.push("enabled=" + encodeURIComponent(coopSearchSettings.enabled));
+	if ("enabled" in coopSearchSettings && coopSearchSettings.enabled != "none") {
+			individualSearchSettings.push("enabled=" + encodeURIComponent(coopSearchSettings.enabled));
 	}
 
-	// assemble all search settings into a string of format
-	// /coops/?name=coopName&type=credit+union&enabled=true&street=Main&city=Chicago&zip=60605&state=IL
+	// assemble all search settings into a string
 	let i;
 	for (i = 0; i < individualSearchSettings.length; i++) {
 		if (i===0) {
@@ -58,6 +43,16 @@ const doSearch = (coopSearchSettings, setSearchResults, setLoading) => {
 			searchUrl = searchUrl + "&" + individualSearchSettings[i];
 		}
 	}
+
+	setSearchUrl(searchUrl);
+
+}
+
+const doSearch = (coopSearchSettings, setSearchResults, setLoading, searchUrl) => {
+	// abort and fetch logic is very similar to doSearch in Search components
+  abortController.abort();
+  abortController = new window.AbortController();
+  setLoading(true);
 
   fetch(searchUrl, {
     method: "GET",
@@ -78,52 +73,47 @@ const doSearchDebounced = _.debounce(doSearch, 100);
 const AdvancedSearch = (props) => {
 
 	//store evolving search settings before search form is submitted
-	const [coopSearchSettingsStaging, setCoopSearchSettingsStaging] = useState(initCoopSearchSettings() || {});
+	const [coopSearchSettings, setCoopSearchSettings] = useState({});
 
-	//store finalized search settings upon hitting 'submit' button
-	const [coopSearchSettingsToQuery, setCoopSearchSettingsToQuery] = useState(initCoopSearchSettings() || {});
+	// store finalized search url
+	const [searchUrl, setSearchUrl] = useState('');
 
 	const [searchResults, setSearchResults] = useState([]);
 	const [loading, setLoading] = useState(false);
 
-	// search results show when isSubmitted = true
-	// isSubmitted = false when page first loads so that search results will not show
-	// isSubmitted = true after first time the 'submit' button is hit
-	const [isSubmitted, setIsSubmitted] = useState(false);
-
 	useEffect(() => {
 
-		// set searchResults to empty if coopSearchSettingsToQuery is empty
-		if (isSubmitted===false) {
+		// set searchResults to empty if searchUrl is empty
+		if (searchUrl === '') {
 	      setSearchResults([]);
 	      return;
 	    }
 		else {
 			//Let the debounced function do it's thing
-			const results = doSearchDebounced(coopSearchSettingsToQuery, setSearchResults, setLoading);
+			const results = doSearchDebounced(coopSearchSettings, setSearchResults,
+				setLoading, searchUrl);
 			setSearchResults(results);
 			}
 		},
-		// Only re-render page if coopSearchSettingsToQuery has changed.
-		// coopSearchSettingsStaging is not a dependency because we do want not re-render page
+		// Only re-render page if searchUrl has changed.
+		// coopSearchSettings is not a dependency because we do want not re-render page
 		// every time users type a new character in search form.
-		[coopSearchSettingsToQuery]
+		[searchUrl]
 	);
 
 	const handleInputChange = (event) => {
-		// save user edits to individual form fields to coopSearchSettingsStaging
+		// save user edits to individual form fields to coopSearchSettings
 		const { target } = event;
 		const { name, value } = target;
 		event.persist();
-		setCoopSearchSettingsStaging({ ...coopSearchSettingsStaging, [name]: value });
+		setCoopSearchSettings({ ...coopSearchSettings, [name]: value });
   };
 
   const handleFormSubmit = (e) => {
 		// when the user finalizes search settings by pressing 'submit,'
-		// move search settings from staging to coopSearchSettingsToQuery
+		// built out search URL
 		e.preventDefault();
-		setCoopSearchSettingsToQuery(coopSearchSettingsStaging);
-		setIsSubmitted(true);
+    buildSearchUrl(coopSearchSettings, setSearchUrl);
   };
 
 	// same logic from Search.jsx
@@ -151,6 +141,8 @@ const AdvancedSearch = (props) => {
 
   return (
     <div className="form container-fluid">
+		<h2>{JSON.stringify(coopSearchSettings)}</h2>
+    <h2>Search URL: {searchUrl}</h2>
 		{/* FormGroup logic from FormContainer.jsx */}
     <FormGroup controlId="formBasicText">
 		{/* FormLabel and FormControl logic from Input.jsx */}
@@ -160,7 +152,7 @@ const AdvancedSearch = (props) => {
         class="form-control"
         id={"name"}
         name={"name"}
-        value={coopSearchSettingsStaging.name}
+        value={coopSearchSettings.name}
         placeholder="Enter cooperative name"
         onChange={handleInputChange}
       />{" "}
@@ -169,7 +161,7 @@ const AdvancedSearch = (props) => {
       <label class="form-label" style={inputStyle}>Enabled</label>
       <select
         name={"enabled"}
-        value={coopSearchSettingsStaging.enabled}
+        value={coopSearchSettings.enabled}
         onChange={handleInputChange}
         className="form-control"
       >
